@@ -1,25 +1,21 @@
-
-# THIS FILE NEED 3 VALUES - Dynamic values will come with time (maybe), feel free to implement.
-# VALUE = LIST( (1, 2, 3)) > NEED EXACTLY THREE NUMBERS !!!
-# MAX_VALUE = LIST ( (1, 2, 3)) > NEED EXACTLY THREE NUMBERS !!!
 # MAX_VALUE = THE BACKGROUND GRAPH, HE IS THE DESIRED GOAL
 # VALUE = CURRENT VALUE IN MAX_VALUE 
-
-# PS: create a widget_size property with _draw() 
+#
+#
 # ERRORS:
 # U need set size before value or max_values (because widget_size not implemented yet)
+#
+# FUTURE: create a size property with _data_processing() 
 
 example = """
 RelativeLayout:
     CustomProgressBar:
         size: (200, 200)
         pos: (100, 100)
-        max_value: [100, 150, 130]
-        value: [80, 80, 48]
+        max_value: [100, 140, 90, 100, 110]
+        value: [80, 60, 50, 40, 32]
         thickness: 48
-        primary_color: "#FFBA13"
-        secondary_color: "#1E90FF"
-        tertiary_color: "#1CA884"
+        #colors: ["#008000","A75EC1","1CA884", "DC772D", "DC2D42"]
         #background_color: "#FFFFF6"
 
 """
@@ -41,15 +37,14 @@ class CustomProgressBar(Widget):
         # Espessura 
         self._thickness = 25
         # Valores
-        self._max_value = [2, 2, 2]
-        self._value = [1, 1, 1]
+        self._max_value = [2]
+        self._value = [1]
         # Cores
         self._background_color = [0,0,0,1]
-        self._primary_color = C("#FFBA13")
-        self._secondary_color = C("#1E90FF")
-        self._tertiary_color = C("#1CA884")
+        self._colors = [C("#FFBA13"), C("#1E90FF"), C("#1CA884"), C("#A75EC1"),
+                       C("17973AC"), C("791644"), C("5553D3"), C("A59575")]
         # Desenhar widget
-        self._data_processing()
+        #self._data_processing()
 
     @property
     def thickness(self):
@@ -61,7 +56,7 @@ class CustomProgressBar(Widget):
             raise TypeError("Progress must be an integer value.")
         elif value != self._thickness:
             self._thickness = value
-            self._draw()
+            self._data_processing()
 
     @property
     def value(self):
@@ -71,11 +66,8 @@ class CustomProgressBar(Widget):
     def value(self, value):
         if type(value) != list:
             raise TypeError("Progress must be a List.")
-        elif len(value) != 3:
-            raise KeyError("Exactly three numbers are required.")
-        elif len(value) == 3:
+        else:
             self._value = value
-            self._data_processing()
 
     @property
     def max_value(self):
@@ -85,11 +77,8 @@ class CustomProgressBar(Widget):
     def max_value(self, value):
         if type(value) != list:
             raise TypeError("Progress must be a List.")
-        elif len(value) != 3:
-            raise KeyError("Exactly three numbers are required.")
-        elif len(value) == 3:
+        else:
             self._max_value = value
-            self._data_processing()
 
     @property
     def background_color(self):
@@ -106,71 +95,46 @@ class CustomProgressBar(Widget):
             self._background_color = hexcode
             self._draw()
 
-
     @property
-    def primary_color(self):
-        return self._primary_color
+    def colors(self):
+        return self._colors
 
-    @primary_color.setter
-    def primary_color(self, hexcode):
-        if type(hexcode) not in [str, list]:
-            raise TypeError("Color must be a Hexadecimal code.")
-        elif type(hexcode) == str and self._primary_color != C(hexcode):
-            self._primary_color = C(hexcode)
-            self._draw()
-        elif type(hexcode) == list and self._primary_color != hexcode:
-            self._primary_color = hexcode
-            self._draw()
+    @colors.setter
+    def colors(self, hexlist):
+        
+        if type(hexlist) != list:
+            raise TypeError("Colors must be a Hexadecimal code in a List.")
+        
+        conversion = list()
+        for x in hexlist:
+            if type(x) != str:
+                raise TypeError("Colors must be a Hexadecimal Code.")
+            else:
+                conversion.append(C(x))
+        self._colors = conversion
+        self._data_processing()
 
-    @property
-    def secondary_color(self):
-        return self._secondary_color
-
-    @secondary_color.setter
-    def secondary_color(self, hexcode):
-        if type(hexcode) not in [str, list]:
-            raise TypeError("Color must be a Hexadecimal code.")
-        elif type(hexcode) == str and self._secondary_color != C(hexcode):
-            self._secondary_color = C(hexcode)
-            self._draw()
-        elif type(hexcode) == list and self._secondary_color != hexcode:
-            self._secondary_color = hexcode
-            self._draw()
-
-    @property
-    def tertiary_color(self):
-        return self._tertiary_color
-
-    @tertiary_color.setter
-    def tertiary_color(self, hexcode):
-        if type(hexcode) not in [str, list]:
-            raise TypeError("Color must be a Hexadecimal code.")
-        elif type(hexcode) == str and self._tertiary_color != C(hexcode):
-            self._tertiary_color = C(hexcode)
-            self._draw()
-        elif type(hexcode) == list and self._tertiary_color != hexcode:
-            self._tertiary_color = hexcode
-            self._draw()
 
     def _data_processing(self):
 
-        # max_value = background
-        self._mv1 = ((self._max_value[0] * 100) / sum(self._max_value))/100 * 360
-        self._mv2 = ((self._max_value[1] * 100) / sum(self._max_value))/100 * 360
-        self._mv3 = ((self._max_value[2] * 100) / sum(self._max_value))/100 * 360
+        if len(self._max_value) != len(self._value):
+            raise IndexError("'max_value' and 'value' must have the same amount of values.")
 
-        # value = actual value / progress bar
-        self._v1 = ((self._value[0] * 100) / self._max_value[0])/100 * self._mv1
-        self._v2 = ((self._value[1] * 100) / self._max_value[1])/100 * self._mv2
-        self._v3 = ((self._value[2] * 100) / self._max_value[2])/100 * self._mv3
-
-        self._draw()
+        elif len(self._colors) < len(self._max_value):
+            raise IndexError("Insufficient colors. Assign colors propertie with a list with same number of values as in 'max_value'.")
+        else:
+            i= 0
+            for x in self._max_value:
+                print("{} < {}".format(x, self._value[i]))
+                if x < self._value[i]:
+                    raise ValueError("'value' cannot be greater than 'max_value'.")
+                i+= 1
+            self._draw()
 
 
     def _draw(self):
 
         with self.canvas:
-            
             # Limpar layout
             self.canvas.clear()
 
@@ -178,44 +142,33 @@ class CustomProgressBar(Widget):
             Color(0.26, 0.26, 0.26)
             Ellipse(pos=self.pos, size=self.size)
 
-            # BACKGROUND VALOR 1
-            primary_background_color = self._primary_color.copy()
-            primary_background_color[-1] = 0.5
+            # DRAWING MAX VALUE AND VALUE 
 
-            Color(*primary_background_color)
-            Ellipse(pos=self.pos, size=self.size,
-                    angle_end=(self._mv1))
-            
-            # PROGRESS VALOR 1
-            Color(*self._primary_color)
-            Ellipse(pos=self.pos, size=self.size,
-                    angle_end=(self._v1))
+            previous_value = 0
+            progress_value = 0
+            i = 0 
+            for x in self._max_value:
+                
+                # 'max_value' calc
+                actual_value = ((x * 100) / sum(self._max_value))/100 * 360
+                # 'value' calc
+                actual_progress = ((self._value[i] * 100) / sum(self._max_value))/100 * 360
+                # bk color
+                actual_color = self._colors[i]
+                actual_color[-1] = 0.5
 
-            # BACKGROUND VALOR 2
-            secondary_background_color = self._secondary_color.copy()
-            secondary_background_color[-1] = 0.5
+                # background
+                Color(*actual_color)
+                Ellipse(pos=self.pos, size=self.size, angle_start=(previous_value), angle_end=(progress_value+actual_value))
 
-            Color(*secondary_background_color)
-            Ellipse(pos=self.pos, size=self.size, angle_start=(self._mv1),
-                    angle_end=(self._mv1 + self._mv2))
-            
-            # PROGRESS VALOR 2
-            Color(*self._secondary_color)
-            Ellipse(pos=self.pos, size=self.size, angle_start=(self._mv1),
-                    angle_end=(self._mv1 + self._v2))
+                # progress
+                Color(*self._colors[i])
+                Ellipse(pos=self.pos, size=self.size, angle_start=(previous_value), angle_end=(progress_value+actual_progress))
 
-            # BACKGROUND VALOR 3
-            tertiary_background_color = self._tertiary_color.copy()
-            tertiary_background_color[-1] = 0.5
+                progress_value += actual_value
+                previous_value = progress_value
+                i += 1
 
-            Color(*tertiary_background_color)
-            Ellipse(pos=self.pos, size=self.size, angle_start=(self._mv1+self._mv2),
-                    angle_end=(self._mv1 + self._mv2 + self._mv3))
-            
-            # PROGRESS VALOR 3
-            Color(*self._tertiary_color)
-            Ellipse(pos=self.pos, size=self.size, angle_start=(self._mv1+self._mv2),
-                    angle_end=(self._mv1 + self._mv2 + self._v3))
 
             # Circulo interno
             Color(*self._background_color)
@@ -228,6 +181,7 @@ class CustomProgressBar(Widget):
 #######################################EXAMPLE#######################################################
 #######EXAMPLE##################################################################EXAMPLE###############
 
+# EXAMPLE KV CODE IN LINE 10
 if __name__ == '__main__':
     
     class Main(App):
