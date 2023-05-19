@@ -3,7 +3,7 @@
 #
 #
 # ERRORS:
-# U need set size before value or max_values (because widget_size not implemented yet)
+# U need set size before value or max_values (because size not implemented yet)
 #
 # FUTURE: create a size property with _data_processing() 
 
